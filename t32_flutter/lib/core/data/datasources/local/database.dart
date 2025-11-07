@@ -1,8 +1,12 @@
 
 import 'package:drift/drift.dart';
-import 'package:drift_flutter/drift_flutter.dart';
 import 'package:uuid/uuid.dart';
 import 'database_types.dart';
+
+import 'package:drift/native.dart';  // ДОБАВЬТЕ эту строку
+import 'package:path_provider/path_provider.dart';  // Уже должна быть
+import 'package:path/path.dart' as p;  // Уже должна быть
+import 'dart:io';  // ДОБАВЬТЕ эту строку
 
 import 'tables/sync_metadata_table.dart';
 import '../../../../features/configuration/data/datasources/local/tables/configuration_table.dart';
@@ -40,11 +44,26 @@ MigrationStrategy get migration => MigrationStrategy(
         }        
     );
 
-  static QueryExecutor _openConnection() {
-    return driftDatabase(
-      name: 't2_flutter',
-    );
+  // static QueryExecutor _openConnection() {
+  //   return driftDatabase(
+  //     name: 't2_flutter',
+  //   );
+  // }
+
+ static QueryExecutor _openConnection() {
+    // Используем LazyDatabase для асинхронной инициализации
+    return LazyDatabase(() async {
+      // Получаем папку для хранения данных приложения
+      final dbFolder = await getApplicationDocumentsDirectory();
+      
+      // Создаем файл базы данных
+      final file = File(p.join(dbFolder.path, 't27_flutter.sqlite'));
+      
+      // Возвращаем NativeDatabase с файлом
+      return NativeDatabase(file);
+    });
   }
+
 }
 
 
